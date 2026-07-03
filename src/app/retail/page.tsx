@@ -15,8 +15,14 @@ import {
   Calendar,
   AlertTriangle,
   Database,
-  Loader2
+  Loader2,
+  ShieldCheck,
+  MapPin,
+  Package,
+  FileText,
+  Lock
 } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { useCart } from "@/context/CartContext";
@@ -28,6 +34,51 @@ const CATEGORIES = [
   { id: "beverages", label: "Dairy & Beverages" },
   { id: "organic", label: "Organic & Health" },
   { id: "packaged", label: "Frozen & Packaged" }
+];
+
+// Helper functions for cookies
+const getCookie = (name: string): string => {
+  if (typeof window === "undefined") return "";
+  const value = `; ${document.cookie}`;
+  const parts = value.split(`; ${name}=`);
+  if (parts.length === 2) return decodeURIComponent(parts.pop()?.split(";").shift() || "");
+  return "";
+};
+
+const setCookie = (name: string, value: string, days: number): void => {
+  if (typeof window === "undefined") return;
+  const date = new Date();
+  date.setTime(date.getTime() + days * 24 * 60 * 60 * 1000);
+  const expires = `; expires=${date.toUTCString()}`;
+  document.cookie = `${name}=${encodeURIComponent(value)}${expires}; path=/; SameSite=Strict`;
+};
+
+const PROCESSING_STEPS = [
+  {
+    title: "Securing Connection",
+    desc: "Establishing an encrypted tunnel with order APIs...",
+    icon: ShieldCheck
+  },
+  {
+    title: "Checking Stock Availability",
+    desc: "Validating fresh inventory allocations at our Jaipur fulfillment hub...",
+    icon: Database
+  },
+  {
+    title: "Verifying Shipping Address",
+    desc: "Matching postal code parameters and route feasibility...",
+    icon: MapPin
+  },
+  {
+    title: "Registering COD Cargo Booking",
+    desc: "Securing courier slots and generating consignment ID...",
+    icon: Truck
+  },
+  {
+    title: "Finalizing Order Confirmation",
+    desc: "Writing secure receipt token to ledger database...",
+    icon: Package
+  }
 ];
 
 function RetailStoreContent() {
@@ -44,6 +95,8 @@ function RetailStoreContent() {
   const [showCheckout, setShowCheckout] = useState(false);
   const [orderSuccess, setOrderSuccess] = useState(false);
   const [orderId, setOrderId] = useState("");
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [currentStepIndex, setCurrentStepIndex] = useState(0);
 
   // Checkout Form State
   const [formData, setFormData] = useState({
@@ -75,6 +128,22 @@ function RetailStoreContent() {
 
   useEffect(() => {
     fetchProducts();
+  }, []);
+
+  // Load checkout address details from cookies on mount
+  useEffect(() => {
+    const savedDetailsStr = getCookie("grocella_checkout_details");
+    if (savedDetailsStr) {
+      try {
+        const savedDetails = JSON.parse(savedDetailsStr);
+        setFormData(prev => ({
+          ...prev,
+          ...savedDetails
+        }));
+      } catch (e) {
+        console.error("Failed to parse checkout details cookie:", e);
+      }
+    }
   }, []);
 
   // Load category from query string if available
@@ -109,16 +178,44 @@ function RetailStoreContent() {
 
   const handleCheckoutSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // Simulate order placement
-    const randomId = "GF-" + Math.floor(100000 + Math.random() * 900000);
-    setOrderId(randomId);
-    setOrderSuccess(true);
-    clearCart();
-    // Remove query params
-    router.replace("/retail");
+
+    // Save shipping details to cookies (valid for 30 days)
+    const checkoutDetails = {
+      name: formData.name,
+      email: formData.email,
+      phone: formData.phone,
+      address: formData.address,
+      city: formData.city,
+      state: formData.state,
+      zip: formData.zip
+    };
+    setCookie("grocella_checkout_details", JSON.stringify(checkoutDetails), 30);
+
+    // Start real-time processing simulation
+    setIsProcessing(true);
+    setCurrentStepIndex(0);
+
+    let step = 0;
+    const interval = setInterval(() => {
+      step++;
+      if (step < PROCESSING_STEPS.length) {
+        setCurrentStepIndex(step);
+      } else {
+        clearInterval(interval);
+        // Simulate order placement completion
+        const randomId = "GF-" + Math.floor(100000 + Math.random() * 900000);
+        setOrderId(randomId);
+        setIsProcessing(false);
+        setOrderSuccess(true);
+        clearCart();
+        // Remove query params
+        router.replace("/retail");
+      }
+    }, 1200); // 1.2 seconds per step for realistic feel
   };
 
   const handleCloseCheckout = () => {
+    if (isProcessing) return; // Prevent closing during active order registration
     setShowCheckout(false);
     setOrderSuccess(false);
   };
@@ -302,17 +399,133 @@ function RetailStoreContent() {
 
             <span className="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
 
-            <div className="inline-block align-bottom bg-white rounded-3xl text-left overflow-hidden shadow-2xl transform transition-all sm:my-8 sm:align-middle sm:max-w-4xl sm:w-full border border-slate-100">
-              <div className="absolute right-6 top-6 z-10">
-                <button
-                  onClick={handleCloseCheckout}
-                  className="bg-slate-100 hover:bg-slate-200 text-slate-550 rounded-full p-2.5 transition-colors focus:outline-none"
-                >
-                  <X className="w-5 h-5" />
-                </button>
-              </div>
+            <div className="relative z-10 inline-block align-bottom bg-white rounded-3xl text-left overflow-hidden shadow-2xl transform transition-all sm:my-8 sm:align-middle sm:max-w-4xl sm:w-full border border-slate-100">
+              {!isProcessing && (
+                <div className="absolute right-6 top-6 z-10">
+                  <button
+                    onClick={handleCloseCheckout}
+                    className="bg-slate-100 hover:bg-slate-200 text-slate-550 rounded-full p-2.5 transition-colors focus:outline-none"
+                  >
+                    <X className="w-5 h-5" />
+                  </button>
+                </div>
+              )}
 
-              {!orderSuccess ? (
+              {isProcessing ? (
+                /* Processing Screen */
+                <div className="p-8 sm:p-12 max-w-2xl mx-auto flex flex-col justify-center">
+                  <div className="text-center mb-8">
+                    {/* Pulsating Logo / Spinner */}
+                    <div className="relative w-20 h-20 mx-auto mb-6 flex items-center justify-center">
+                      <motion.div
+                        className="absolute inset-0 rounded-3xl bg-grocella-100 opacity-40"
+                        animate={{
+                          scale: [1, 1.25, 1],
+                          rotate: [0, 90, 180, 270, 360],
+                          borderRadius: ["24%", "50%", "24%"]
+                        }}
+                        transition={{
+                          duration: 4,
+                          repeat: Infinity,
+                          ease: "easeInOut"
+                        }}
+                      />
+                      <motion.div
+                        className="absolute w-16 h-16 rounded-2xl bg-grocella-700/10 flex items-center justify-center border border-grocella-250"
+                        animate={{
+                          scale: [1, 1.1, 1],
+                        }}
+                        transition={{
+                          duration: 2,
+                          repeat: Infinity,
+                          ease: "easeInOut"
+                        }}
+                      >
+                        <Lock className="w-8 h-8 text-grocella-700" />
+                      </motion.div>
+                    </div>
+
+                    <h2 className="text-2xl font-serif font-black text-slate-900">
+                      Processing Your Order
+                    </h2>
+                    <p className="text-xs text-slate-500 mt-2 max-w-md mx-auto font-light leading-relaxed">
+                      We are securing your session and booking inventory. Please do not refresh or close this tab.
+                    </p>
+                  </div>
+
+                  {/* Progress Bar */}
+                  <div className="mb-8 bg-slate-100 rounded-full h-2 overflow-hidden relative shadow-inner">
+                    <motion.div
+                      className="h-full bg-gradient-to-r from-grocella-600 via-grocella-700 to-grocella-800 rounded-full shadow-lg"
+                      initial={{ width: "0%" }}
+                      animate={{
+                        width: `${((currentStepIndex + 1) / PROCESSING_STEPS.length) * 100}%`
+                      }}
+                      transition={{ duration: 0.8, ease: "easeOut" }}
+                    />
+                  </div>
+
+                  {/* Steps Progress List */}
+                  <div className="space-y-4 bg-slate-50 p-6 rounded-2xl border border-slate-150">
+                    {PROCESSING_STEPS.map((step, idx) => {
+                      const Icon = step.icon;
+                      const isCompleted = idx < currentStepIndex;
+                      const isActive = idx === currentStepIndex;
+                      const isPending = idx > currentStepIndex;
+
+                      return (
+                        <div
+                          key={idx}
+                          className={`flex items-start gap-4 transition-all duration-300 ${
+                            isCompleted ? "opacity-75" : isActive ? "opacity-100 scale-[1.01]" : "opacity-40"
+                          }`}
+                        >
+                          <div className="relative flex-shrink-0 mt-0.5">
+                            {isCompleted ? (
+                              <motion.div
+                                initial={{ scale: 0 }}
+                                animate={{ scale: 1 }}
+                                className="w-6 h-6 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600"
+                              >
+                                <CheckCircle2 className="w-4 h-4" />
+                              </motion.div>
+                            ) : isActive ? (
+                              <div className="w-6 h-6 rounded-full bg-grocella-100 flex items-center justify-center text-grocella-700">
+                                <Loader2 className="w-4 h-4 animate-spin" />
+                              </div>
+                            ) : (
+                              <div className="w-6 h-6 rounded-full border-2 border-slate-200 bg-white flex items-center justify-center" />
+                            )}
+                          </div>
+
+                          <div className="flex-grow">
+                            <p
+                              className={`text-xs font-bold ${
+                                isActive ? "text-grocella-800" : isCompleted ? "text-slate-700" : "text-slate-500"
+                              }`}
+                            >
+                              {step.title}
+                            </p>
+                            {isActive && (
+                              <motion.p
+                                initial={{ opacity: 0, y: -2 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                className="text-[10px] text-slate-500 font-light mt-0.5"
+                              >
+                                {step.desc}
+                              </motion.p>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+
+                  <div className="mt-8 flex justify-center items-center gap-1.5 text-[10px] text-slate-400 font-semibold uppercase tracking-widest text-center border-t border-slate-100 pt-5">
+                    <ShieldCheck className="w-3.5 h-3.5 text-grocella-600" /> Secure SSL Order Ledger
+                  </div>
+                </div>
+              ) : !orderSuccess ? (
                 <div className="grid md:grid-cols-5 h-full">
                   {/* Form input */}
                   <form onSubmit={handleCheckoutSubmit} className="md:col-span-3 p-8 sm:p-10">
@@ -447,9 +660,9 @@ function RetailStoreContent() {
                       <button
                         type="submit"
                         disabled={cartCount === 0}
-                        className="px-8 py-3 bg-grocella-700 text-white rounded-xl text-xs font-bold hover:bg-grocella-800 transition-all flex items-center justify-center gap-2 w-2/3 shadow-md shadow-grocella-700/20 disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="px-8 py-3 bg-grocella-700 text-white rounded-xl text-xs font-bold hover:bg-grocella-800 transition-all flex items-center justify-center gap-2 w-2/3 shadow-md shadow-grocella-700/20 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
                       >
-                        Place COD Order
+                        {formData.payment === "upi" ? "Place UPI Order" : "Place COD Order"}
                       </button>
                     </div>
                   </form>
@@ -515,7 +728,7 @@ function RetailStoreContent() {
               ) : (
                 /* Success Screen */
                 <div className="p-10 sm:p-14 text-center max-w-xl mx-auto">
-                  <div className="w-16 h-16 bg-emerald-100 rounded-2xl flex items-center justify-center mx-auto mb-6 text-emerald-600">
+                  <div className="w-16 h-16 bg-emerald-100 rounded-2xl flex items-center justify-center mx-auto mb-6 text-emerald-600 animate-bounce">
                     <CheckCircle2 className="w-10 h-10" />
                   </div>
                   <h2 className="text-3xl font-serif font-black text-slate-900">Order Placed!</h2>
@@ -543,18 +756,12 @@ function RetailStoreContent() {
                     </div>
                   </div>
 
-                  <div className="flex flex-col sm:flex-row gap-3.5 justify-center">
+                  <div className="flex justify-center">
                     <button
                       onClick={handleCloseCheckout}
-                      className="px-6 py-3 border border-slate-250 text-slate-655 hover:bg-slate-50 rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5"
+                      className="px-8 py-3 bg-grocella-700 hover:bg-grocella-800 text-white rounded-xl text-xs font-bold shadow-md flex items-center justify-center gap-1.5 cursor-pointer"
                     >
                       Continue Shopping
-                    </button>
-                    <button
-                      onClick={() => alert("Simulating receipt download...")}
-                      className="px-8 py-3 bg-grocella-900 text-white rounded-xl text-xs font-bold hover:bg-grocella-800 shadow-md flex items-center justify-center gap-2"
-                    >
-                      <Download className="w-4 h-4" /> Download Receipt
                     </button>
                   </div>
                 </div>
