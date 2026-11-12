@@ -112,11 +112,18 @@ export default function Footer() {
                   Careers
                 </a>
               </li>
-              <li>
-                <a href="#" className="hover:text-grocella-400 transition-colors font-medium">
-                  Legal & Privacy Policy
-                </a>
-              </li>
+              {[
+                ["/privacy-policy", "Privacy Policy"],
+                ["/terms-and-conditions", "Terms & Conditions"],
+                ["/refund-policy", "Return & Refund Policy"],
+                ["/cancellation-policy", "Cancellation Policy"],
+              ].map(([href, label]) => (
+                <li key={href}>
+                  <Link href={href} className="hover:text-grocella-400 transition-colors font-medium">
+                    {label}
+                  </Link>
+                </li>
+              ))}
             </ul>
           </div>
 
