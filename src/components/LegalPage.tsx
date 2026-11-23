@@ -33,9 +33,14 @@ export default function LegalPage({ title, intro, sections }: { title: string; i
             </section>
           ))}
           <p className="mt-10 text-sm text-slate-600 border-t border-slate-200 pt-6">
-            Grocella Foods (OPC) Private Limited, Rajasthan, India. Questions? Email{" "}
-            <a href="mailto:contact@grocellafoods.com" className="text-grocella-700 font-semibold hover:underline">
-              contact@grocellafoods.com
+            Grocella Foods (OPC) Private Limited, 2nd Floor, S.N-B10, P.No-781, Arihant Plaza, Dadabari, Kota,
+            Rajasthan 324009, India. Questions? Email{" "}
+            <a href="mailto:grocellafoods@gmail.com" className="text-grocella-700 font-semibold hover:underline">
+              grocellafoods@gmail.com
+            </a>{" "}
+            or call{" "}
+            <a href="tel:+917240061285" className="text-grocella-700 font-semibold hover:underline">
+              +91 72400 61285
             </a>
             .
           </p>

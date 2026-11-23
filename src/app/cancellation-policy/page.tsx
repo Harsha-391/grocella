@@ -18,7 +18,7 @@ export default function CancellationPolicy() {
         {
           heading: "How to cancel",
           bullets: [
-            "Email contact@grocellafoods.com from the address used on the order, quoting your order number.",
+            "Email grocellafoods@gmail.com from the address used on the order, quoting your order number.",
             "We will confirm the cancellation by email. Requests are processed in the order received, so please write to us as early as possible.",
           ],
         },

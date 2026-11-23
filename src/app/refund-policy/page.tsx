@@ -29,7 +29,7 @@ export default function RefundPolicy() {
         {
           heading: "How to request a return or refund",
           paragraphs: [
-            "Email contact@grocellafoods.com within 48 hours of delivery with your order number, a short description of the issue, and clear photos of the product, batch/expiry label and packaging. We may ask for a short unboxing video for damage claims.",
+            "Email grocellafoods@gmail.com within 48 hours of delivery with your order number, a short description of the issue, and clear photos of the product, batch/expiry label and packaging. We may ask for a short unboxing video for damage claims.",
           ],
         },
         {

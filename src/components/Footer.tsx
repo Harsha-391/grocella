@@ -117,6 +117,7 @@ export default function Footer() {
                 ["/terms-and-conditions", "Terms & Conditions"],
                 ["/refund-policy", "Return & Refund Policy"],
                 ["/cancellation-policy", "Cancellation Policy"],
+                ["/contact-us", "Contact Us"],
               ].map(([href, label]) => (
                 <li key={href}>
                   <Link href={href} className="hover:text-grocella-400 transition-colors font-medium">
@@ -134,21 +135,21 @@ export default function Footer() {
               <li className="flex items-start gap-3 leading-relaxed">
                 <MapPin className="w-5 h-5 text-grocella-400 mt-0.5 flex-shrink-0" />
                 <span>
-                  Rajasthan, India
+                  2nd Floor, S.N-B10, P.No-781, Arihant Plaza, Dadabari
                   <br />
-                  <span className="text-slate-450 text-xs">(Full address available upon request)</span>
+                  Kota, Rajasthan 324009, India
                 </span>
               </li>
               <li className="flex items-center gap-3">
                 <Mail className="w-5 h-5 text-grocella-400 flex-shrink-0" />
-                <a href="mailto:contact@grocellafoods.com" className="hover:text-white transition-colors">
-                  contact@grocellafoods.com
+                <a href="mailto:grocellafoods@gmail.com" className="hover:text-white transition-colors">
+                  grocellafoods@gmail.com
                 </a>
               </li>
               <li className="flex items-center gap-3">
                 <Phone className="w-5 h-5 text-grocella-400 flex-shrink-0" />
-                <a href="tel:+919876543210" className="hover:text-white transition-colors">
-                  +91 (XXX) XXX-XXXX
+                <a href="tel:+917240061285" className="hover:text-white transition-colors">
+                  +91 72400 61285
                 </a>
               </li>
             </ul>

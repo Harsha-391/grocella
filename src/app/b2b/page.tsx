@@ -750,7 +750,7 @@ export default function B2BPortal() {
 
                     <div className="text-right text-[10px] text-slate-500 space-y-1">
                       <strong className="text-slate-905 block text-xs">GROCELLA FOODS (OPC) PVT LTD</strong>
-                      <p>Rajasthan, India</p>
+                      <p>2nd Floor, S.N-B10, P.No-781, Arihant Plaza, Dadabari, Kota, Rajasthan 324009</p>
                       <p>FSSAI: 122XXXXXX00001</p>
                     </div>
                   </div>

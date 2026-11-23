@@ -48,7 +48,7 @@ export default function PrivacyPolicy() {
         {
           heading: "Your rights",
           paragraphs: [
-            "Subject to applicable Indian law, including the Digital Personal Data Protection Act, 2023, you may ask us to access, correct or delete your personal data, or withdraw consent to its processing. Email contact@grocellafoods.com and we will respond within a reasonable time.",
+            "Subject to applicable Indian law, including the Digital Personal Data Protection Act, 2023, you may ask us to access, correct or delete your personal data, or withdraw consent to its processing. Email grocellafoods@gmail.com and we will respond within a reasonable time.",
           ],
         },
         {
